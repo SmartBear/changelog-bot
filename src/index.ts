@@ -1,4 +1,6 @@
 import { Probot } from "probot";
+import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods'
+import { ChangeLog} from './model/ChangeLog'
 
 console.log("starting up...")
 
@@ -22,20 +24,28 @@ export = (app: Probot) => {
     // TODO: handle when there is no changelog - we get a 404 error here
     const { data } = await context.octokit.repos.getContent({ path: "CHANGELOG.md", owner, repo, ref })
 
-    // narrow type to content-file
+    // narrow type to content-file; `data` could be other types like a directory listing
     if ("content" in data) {
       const content = Buffer.from(data.content, "base64").toString()
       app.log.info(content)
-    }
     
-    // 2. Parse it, to relate releases to issues
-    // -----------------------------------------
-  
-    // TODO...
+      // 2. Parse it, to relate releases to issues
+      // -----------------------------------------
+      const changeLog = ChangeLog.parse(content)
 
-    // 3. Comment on issues
-    // --------------------
-
-    // await context.octokit.issues.createComment(issueComment);
+      // 3. Comment on issues
+      // --------------------
+      for(const release of changeLog.releases) {
+        for(const issue of release.issues) {
+          const issueComment: RestEndpointMethodTypes["issues"]["createComment"]["parameters"] = {
+            owner,
+            repo,
+            issue_number: issue.number,
+            body: `This was released in ${release.name}`
+          }
+          await context.octokit.issues.createComment(issueComment);
+        }
+      }
+    }
   });
 };
