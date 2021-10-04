@@ -111,3 +111,5 @@ dist
 
 # probot
 lib
+*.pem
+!mock-cert.pem
