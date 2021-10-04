@@ -12,18 +12,30 @@ export = (app: Probot) => {
     }
 
     // STEPS:
+
     // 1. Read the body of the changelog file
+    // --------------------------------------
+
     const owner: string = context.payload.organization?.login || ""
     const repo: string = context.payload.repository.name
     const ref: string = context.payload.after
-
     // TODO: handle when there is no changelog - we get a 404 error here
     const { data } = await context.octokit.repos.getContent({ path: "CHANGELOG.md", owner, repo, ref })
-    app.log.info(data)
+
+    // narrow type to content-file
+    if ("content" in data) {
+      const content = Buffer.from(data.content, "base64").toString()
+      app.log.info(content)
+    }
     
     // 2. Parse it, to relate releases to issues
-    // 3. Comment on issues
+    // -----------------------------------------
+  
+    // TODO...
 
-//    await context.octokit.issues.createComment(issueComment);
+    // 3. Comment on issues
+    // --------------------
+
+    // await context.octokit.issues.createComment(issueComment);
   });
 };
