@@ -11,13 +11,15 @@ export = (app: Probot) => {
       return
     }
 
-    // TODO:
+    // STEPS:
     // 1. Read the body of the changelog file
     const owner: string = context.payload.organization?.login || ""
     const repo: string = context.payload.repository.name
-    const changelogBody = context.octokit.repos.getContent({ path: "CHANGELOG.md", owner, repo })
+    const ref: string = context.payload.after
 
-    app.log.info(changelogBody)
+    // TODO: handle when there is no changelog - we get a 404 error here
+    const { data } = await context.octokit.repos.getContent({ path: "CHANGELOG.md", owner, repo, ref })
+    app.log.info(data)
     
     // 2. Parse it, to relate releases to issues
     // 3. Comment on issues
