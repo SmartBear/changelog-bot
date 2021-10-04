@@ -113,3 +113,6 @@ dist
 lib
 *.pem
 !mock-cert.pem
+
+# OSX
+.DS_Store
