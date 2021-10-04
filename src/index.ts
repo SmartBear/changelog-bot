@@ -1,10 +1,13 @@
 import { Probot } from "probot";
 
+console.log("starting up...")
+
 export = (app: Probot) => {
   app.on("push", async (context) => {
 
+    console.log("got a push!")
+    app.log.info(context);
     if (context.payload.ref === 'refs/heads/master'){
-      app.log.info(context);
 
       //context.payload.commits[0]
     }
