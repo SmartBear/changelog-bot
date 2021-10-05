@@ -2,6 +2,8 @@ import { assertThat, equalTo } from 'hamjest'
 import { ChangeLog } from './ChangeLog'
 import { Release } from './Release'
 import { Issue } from './Issue'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
 
 describe(ChangeLog.name, () => {
   it('parses a changelog with a single release', async () => {
@@ -65,6 +67,21 @@ describe(ChangeLog.name, () => {
     assertThat(
       changeLog.releases[1],
       equalTo(new Release('6.1.0', [new Issue(3), new Issue(4)]))
+    )
+  })
+
+  it('can parse a big ugly changelog', async () => {
+    const content = readFileSync(
+      resolve(__dirname, '../..', 'test/fixtures/cucumber-js-changelog.md')
+    ).toString()
+    const changeLog = await ChangeLog.parse(content)
+    assertThat(changeLog.releases[1].name, equalTo('7.3.0'))
+    assertThat(
+      changeLog.releases[1].issues.map((issue) => issue.number),
+      equalTo([
+        1645, 1408, 1669, 1667, 1690, 1579, 1669, 1302, 1568, 1534, 1672, 1621,
+        1651
+      ])
     )
   })
 })

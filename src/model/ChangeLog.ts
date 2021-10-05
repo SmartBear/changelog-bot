@@ -9,7 +9,7 @@ export class ChangeLog {
         text: content
       })
       const releases = result.versions.map((version) => {
-        const issues = ChangeLog.findIssues(version.parsed._)
+        const issues = ChangeLog.findIssues(version.body)
         const release = new Release(version.version || version.title, issues)
         return release
       })
@@ -20,17 +20,12 @@ export class ChangeLog {
     }
   }
 
-  private static findIssues(lines: string[]) {
-    const rowIssues: Issue[] = []
-    lines.forEach((row) => {
-      const re = new RegExp('(#\\d+)')
-      const matches = re.exec(row)
-      if (matches) {
-        const issueNumber: number = parseInt(matches[0].replace('#', ''))
-        rowIssues.push(new Issue(issueNumber))
-      }
-    })
-    return rowIssues
+  private static findIssues(body: string) {
+    const matches = body.match(new RegExp('(#\\d+)', 'mg'))
+    if (!matches) {
+      return []
+    }
+    return matches.map((match) => new Issue(parseInt(match.replace('#', ''))))
   }
 
   constructor(public releases: Release[]) {}

@@ -23,7 +23,7 @@ export interface Options {
 export type ParsedVersion = {
   version: string
   title: string
-  parsed: { _: string[] }
+  body: string
 }
 
 export type ParsedChangeLog = {
