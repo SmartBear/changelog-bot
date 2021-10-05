@@ -34,4 +34,20 @@ describe(ChangeLog.name, () => {
     assertThat(changeLog.releases[0], equalTo(new Release('7.0.0', [new Issue(1), new Issue(2)])))
     assertThat(changeLog.releases[1], equalTo(new Release('6.1.0', [new Issue(3), new Issue(4)])))
   })
+
+  it("can handle [Unreleased]", async () => {
+    const content = `
+## [Unreleased]
+### Added
+* Add a feature, fixes (#1)
+* Add a feature, fixes (#2)
+## [6.1.0](https://github.com/cucumber/cucumber-ruby/compare/v5.1.0...v6.1.0) (2020-07-19)
+### Added
+* Add a feature, fixes [#3]
+* Add a feature, fixes #4
+    `;
+    const changeLog = await ChangeLog.parse(content)
+    assertThat(changeLog.releases[0], equalTo(new Release('[Unreleased]', [new Issue(1), new Issue(2)])))
+    assertThat(changeLog.releases[1], equalTo(new Release('6.1.0', [new Issue(3), new Issue(4)])))
+  })
 })

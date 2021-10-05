@@ -12,7 +12,7 @@ export class ChangeLog {
       .then(function (result: any) {
         result.versions.forEach((version: any) => {
           console.log("found version", version)
-          const release = new Release(version.version, []);
+          const release = new Release(version.version || version.title, []);
 
           let rowIssues = ChangeLog.findIssues(version);
           release.issues.push(...rowIssues);
