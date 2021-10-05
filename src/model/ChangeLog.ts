@@ -2,28 +2,18 @@ import { Issue } from './Issue'
 import { Release } from './Release'
 import parseChangeLog from 'changelog-parser'
 
-type ParsedVersion = {
-  version: string
-  title: string
-  parsed: { _: string[] }
-}
-
-type ParsedChangeLog = {
-  versions: ParsedVersion[]
-}
-
 export class ChangeLog {
   static async parse(content: string): Promise<ChangeLog> {
     const releases: Release[] = []
 
     try {
-      const result: ParsedChangeLog = (await parseChangeLog(
-        content
-      )) as ParsedChangeLog
-      result.versions.forEach((version: ParsedVersion) => {
+      const result = await parseChangeLog({
+        text: content
+      })
+      result.versions.forEach((version) => {
         const release = new Release(version.version || version.title, [])
 
-        const rowIssues = ChangeLog.findIssues(version)
+        const rowIssues = ChangeLog.findIssues(version.parsed._)
         release.issues.push(...rowIssues)
         releases.push(release)
       })
@@ -33,9 +23,9 @@ export class ChangeLog {
     return new ChangeLog(releases)
   }
 
-  private static findIssues(version: ParsedVersion) {
+  private static findIssues(lines: string[]) {
     const rowIssues: Issue[] = []
-    version.parsed._.forEach((row) => {
+    lines.forEach((row) => {
       const re = new RegExp('(#\\d+)')
       const matches = re.exec(row)
       if (matches) {
