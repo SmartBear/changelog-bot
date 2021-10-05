@@ -11,10 +11,8 @@ export class ChangeLog {
         text: content
       })
       result.versions.forEach((version) => {
-        const release = new Release(version.version || version.title, [])
-
-        const rowIssues = ChangeLog.findIssues(version.parsed._)
-        release.issues.push(...rowIssues)
+        const issues = ChangeLog.findIssues(version.parsed._)
+        const release = new Release(version.version || version.title, issues)
         releases.push(release)
       })
     } catch (error) {
