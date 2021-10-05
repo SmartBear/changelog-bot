@@ -22,7 +22,6 @@ export = (app: Probot) => {
     const repo: string = context.payload.repository.name
     const ref: string = context.payload.after
     const currentUser = await context.octokit.apps.getAuthenticated()
-    console.log(currentUser.data);
     let data: any;
     try {
       ({ data } = await context.octokit.repos.getContent({ path: "CHANGELOG.md", owner, repo, ref }));
@@ -34,18 +33,23 @@ export = (app: Probot) => {
           owner,
           creator: `${currentUser.data.name}[bot]`
         }
-        const allIssues = await context.octokit.issues.listForRepo(req)
 
-        app.log.info(allIssues)
-        console.log("all issues: ", allIssues)
+        const allIssues: any[] = await context.octokit.paginate(
+          context.octokit.issues.listForRepo,
+          req,
+          ({ data }) => data
+        );
 
-        const issue: RestEndpointMethodTypes["issues"]["create"]["parameters"] = {
-          owner,
-          repo,
-          title: 'CHANGELOG.md is missing',
-          body: 'You really should have a CHANGELOG.md'
+        if (!allIssues.some(issue => issue.title === 'CHANGELOG.md is missing')) {
+          const issue: RestEndpointMethodTypes["issues"]["create"]["parameters"] = {
+            owner,
+            repo,
+            title: 'CHANGELOG.md is missing',
+            body: 'You really should have a CHANGELOG.md'
+          }
+          await context.octokit.issues.create(issue);
         }
-        await context.octokit.issues.create(issue);
+
         return;
       }
     }
@@ -81,7 +85,7 @@ export = (app: Probot) => {
           const commentToAdd = `This was released in ${release.name}`;
 
           const hasPreviousComment: boolean = allComments.some(comment => {
-            return comment.body === commentToAdd && comment.user.login.includes("smartbear-changebot")
+            return comment.body === commentToAdd && comment.user.login === (`${currentUser.data.name}[bot]`)
           });
 
           if (hasPreviousComment) {
