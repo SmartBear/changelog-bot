@@ -117,7 +117,16 @@ export = (app: Probot): void => {
           ({ data }) => data
         )
 
-        const commentToAdd = `This was released in ${release.name}`
+        // copy/pasted from the web 🤞
+        const anchor = release.name
+          .trim()
+          .toLowerCase()
+          .replace(/[^\w\- ]+/g, ' ')
+          .replace(/\s+/g, '-')
+          .replace(/-+$/, '')
+        const releaseUrl = `https://github.com/${owner}/${repo}/blob/${ref}/CHANGELOG.md#${anchor}`
+
+        const commentToAdd = `This was released in [${release.name}](${releaseUrl})`
 
         const hasPreviousComment: boolean = allComments.some((comment) => {
           return (
