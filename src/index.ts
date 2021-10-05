@@ -2,9 +2,9 @@ import { Probot } from 'probot'
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods'
 import { ChangeLog } from './model/ChangeLog'
 
-console.log('starting up...')
-
 export = (app: Probot): void => {
+  app.log.info('Starting up...')
+
   app.on('push', async (context) => {
     app.log.info(context)
 
