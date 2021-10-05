@@ -21,13 +21,24 @@ export = (app: Probot) => {
     const owner: string = context.payload.organization?.login || context.payload.repository.owner.login || ""
     const repo: string = context.payload.repository.name
     const ref: string = context.payload.after
-    // TODO: handle when there is no changelog - we get a 404 error here
+    const currentUser = await context.octokit.apps.getAuthenticated()
+    console.log(currentUser.data);
     let data: any;
     try {
       ({ data } = await context.octokit.repos.getContent({ path: "CHANGELOG.md", owner, repo, ref }));
     } catch (err: any) {
       // create an issue if CHANGELOG.md cannot be found
       if (err.status == 404) {
+        const req: RestEndpointMethodTypes["issues"]["listForRepo"]["parameters"] = {
+          repo,
+          owner,
+          creator: `${currentUser.data.name}[bot]`
+        }
+        const allIssues = await context.octokit.issues.listForRepo(req)
+
+        app.log.info(allIssues)
+        console.log("all issues: ", allIssues)
+
         const issue: RestEndpointMethodTypes["issues"]["create"]["parameters"] = {
           owner,
           repo,
