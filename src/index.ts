@@ -121,10 +121,11 @@ export = (app: Probot): void => {
         const anchor = release.name
           .trim()
           .toLowerCase()
+          .replace(/\./g, '')
           .replace(/[^\w\- ]+/g, ' ')
           .replace(/\s+/g, '-')
           .replace(/-+$/, '')
-        const releaseUrl = `https://github.com/${owner}/${repo}/blob/${ref}/CHANGELOG.md#${anchor}`
+        const releaseUrl = `https://github.com/${owner}/${repo.name}/blob/${ref}/CHANGELOG.md#${anchor}`
 
         const commentToAdd = `This was released in [${release.name}](${releaseUrl})`
 
