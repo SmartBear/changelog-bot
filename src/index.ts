@@ -22,8 +22,22 @@ export = (app: Probot) => {
     const repo: string = context.payload.repository.name
     const ref: string = context.payload.after
     // TODO: handle when there is no changelog - we get a 404 error here
-    const { data } = await context.octokit.repos.getContent({ path: "CHANGELOG.md", owner, repo, ref })
-
+    let data: any;
+    try {
+      ({ data } = await context.octokit.repos.getContent({ path: "CHANGELOG.md", owner, repo, ref }));
+    } catch (err: any) {
+      // create an issue if CHANGELOG.md cannot be found
+      if (err.status == 404) {
+        const issue: RestEndpointMethodTypes["issues"]["create"]["parameters"] = {
+          owner,
+          repo,
+          title: 'CHANGELOG.md is missing',
+          body: 'You really should have a CHANGELOG.md'
+        }
+        await context.octokit.issues.create(issue);
+        return;
+      }
+    }
     // narrow type to content-file; `data` could be other types like a directory listing
     if ("content" in data) {
       const content = Buffer.from(data.content, "base64").toString()
@@ -56,11 +70,11 @@ export = (app: Probot) => {
           const commentToAdd = `This was released in ${release.name}`;
 
           const hasPreviousComment: boolean = allComments.some(comment => {
-            return comment.body === commentToAdd
+            return comment.body === commentToAdd && comment.user.login.includes("smartbear-changebot")
           });
 
           if (hasPreviousComment) {
-            console.log("Not commenting on issue" + issue.number)
+            app.log.debug(`Not commenting on issue ${issue.number} since it already has a comment about this release`);
             continue;
           }
 
