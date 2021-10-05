@@ -18,7 +18,10 @@
   },
   "dependencies": {
     "@octokit/plugin-rest-endpoint-methods": "^5.11.4",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
     "changelog-parser": "^2.8.0",
+    "eslint": "^7.32.0",
     "hamjest": "^3.7.2",
     "probot": "^11.0.1"
   },
