@@ -4,21 +4,20 @@ import parseChangeLog from 'changelog-parser'
 
 export class ChangeLog {
   static async parse(content: string): Promise<ChangeLog> {
-    const releases: Release[] = []
-
     try {
       const result = await parseChangeLog({
         text: content
       })
-      result.versions.forEach((version) => {
+      const releases = result.versions.map((version) => {
         const issues = ChangeLog.findIssues(version.parsed._)
         const release = new Release(version.version || version.title, issues)
-        releases.push(release)
+        return release
       })
+      return new ChangeLog(releases)
     } catch (error) {
       console.log(error)
+      return new ChangeLog([])
     }
-    return new ChangeLog(releases)
   }
 
   private static findIssues(lines: string[]) {
