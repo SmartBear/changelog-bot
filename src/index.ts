@@ -25,11 +25,11 @@ class Repo {
     return Buffer.from(data.content, 'base64').toString()
   }
 
-  public async createPullRequest(ref: string) {
+  public async createPullRequest(origin: string) {
     const mainRef = await this.octokit.rest.git.getRef({
       repo: this.name,
       owner: this.owner,
-      ref
+      ref: `heads/${origin}`
     })
     const branchName = "add-changelog";
     const createBranchParams: RestEndpointMethodTypes['git']['createRef']['parameters'] =
@@ -58,7 +58,7 @@ class Repo {
         repo: this.name,
         title: "A changelog pr",
         head: branchName,
-        base: ref,
+        base: origin,
         body: "the body of the pr"
       }
 
@@ -104,7 +104,7 @@ export = (app: Probot): void => {
       // create an issue if CHANGELOG.md cannot be found
       if (err.status == 404) {
         app.log.info("CHANGELOG missing, creating PR")
-        await repo.createPullRequest(`refs/heads/${context.payload.repository.default_branch}`)
+        await repo.createPullRequest(context.payload.repository.default_branch)
         // const req: RestEndpointMethodTypes['issues']['listForRepo']['parameters'] =
         //   {
         //     repo: repo.name,

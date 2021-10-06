@@ -98,6 +98,12 @@ describe('ChangeBot', () => {
       .get('/repos/SmartBear/changelog-bot-test/contents/CHANGELOG.md')
       .query({ ref: '4a04b239c9f2c6f3876169a1100bb41156bdbde7' })
       .reply(404)
+      .get('/repos/SmartBear/changelog-bot-test/git/ref/heads%2Fmain')
+      .replyWithFile(
+        200,
+        resolve(__dirname, '../test/fixtures/response-main-ref.json'),
+        { 'content-type': 'application/json; charset=utf-8'}
+      )
     // create ref (octokit.rest.git.createRef)
     // create or update file (octokit.repos.createOrUpdateFile)
     // create pull request
