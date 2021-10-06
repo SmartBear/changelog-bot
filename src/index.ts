@@ -1,4 +1,5 @@
 import { Probot, ProbotOctokit } from 'probot'
+import { RequestError } from '@octokit/request-error'
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods'
 import { ChangeLog } from './model/ChangeLog'
 
@@ -55,7 +56,10 @@ export = (app: Probot): void => {
     let content = ''
     try {
       content = await repo.getChangeLogContent(ref)
-    } catch (err: any) {
+    } catch (err) {
+      if (!(err instanceof RequestError)) {
+        throw err
+      }
       // create an issue if CHANGELOG.md cannot be found
       if (err.status == 404) {
         const req: RestEndpointMethodTypes['issues']['listForRepo']['parameters'] =
