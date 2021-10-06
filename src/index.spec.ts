@@ -104,6 +104,23 @@ describe('ChangeBot', () => {
         resolve(__dirname, '../test/fixtures/response-main-ref.json'),
         { 'content-type': 'application/json; charset=utf-8'}
       )
+      .post(
+        '/repos/SmartBear/changelog-bot-test/git/refs',
+        { ref: "refs/heads/add-changelog", sha: "aa218f56b14c9653891f9e74264a383fa43fefbd" }
+      )
+      .reply(
+        201,
+        {
+          "ref": "refs/heads/add-changelog",
+          "node_id": "MDM6UmVmcmVmcy9oZWFkcy9mZWF0dXJlQQ==",
+          "url": "https://api.github.com/repos/SmartBear/changelog-bot-test/git/refs/heads/add-changelog",
+          "object": {
+            "type": "commit",
+            "sha": "aa218f56b14c9653891f9e74264a383fa43fefbd",
+            "url": "https://api.github.com/repos/SmartBear/changelog-bot-test/git/commits/aa218f56b14c9653891f9e74264a383fa43fefbd"
+          }
+        }
+      )
     // create ref (octokit.rest.git.createRef)
     // create or update file (octokit.repos.createOrUpdateFile)
     // create pull request

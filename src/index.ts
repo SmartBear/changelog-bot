@@ -1,6 +1,8 @@
 import { Probot, ProbotOctokit } from 'probot'
 import { RequestError } from '@octokit/request-error'
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import { ChangeLog } from './model/ChangeLog'
 
 class Repo {
@@ -48,7 +50,7 @@ class Repo {
         branch: branchName,
         path: "CHANGELOG.md",
         message: "A new and shiny changelog",
-        content: Buffer.from("CHANGELOG.md").toString('base64')
+        content: readFileSync(join(__dirname, 'CHANGELOG.md')).toString('base64')
       }
     this.octokit.repos.createOrUpdateFileContents(createFileParams)
 
