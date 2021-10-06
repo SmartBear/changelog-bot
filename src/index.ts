@@ -81,6 +81,10 @@ class Repo {
 export = (app: Probot): void => {
   app.log.info('Starting up...')
 
+  app.onAny(async (context) => {
+    app.log.info(`${context.name} event received`)
+  })
+
   app.on('installation.created', async (context) => {
     const owner = context.payload.installation.account.login
     for (const repository of context.payload.repositories) {
@@ -90,6 +94,8 @@ export = (app: Probot): void => {
 
       try {
         await repo.getChangeLogContent(defaultBranch)
+        app.log.info('CHANGELOG.md exists, nothing to do')
+        // TODO: could run a full scan here?
       } catch (err) {
         if (!(err instanceof RequestError)) {
           throw err
