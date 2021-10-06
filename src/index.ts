@@ -145,32 +145,6 @@ export = (app: Probot): void => {
       if (err.status == 404) {
         app.log.info('CHANGELOG missing, creating PR')
         await repo.createPullRequest(context.payload.repository.default_branch)
-        // const req: RestEndpointMethodTypes['issues']['listForRepo']['parameters'] =
-        //   {
-        //     repo: repo.name,
-        //     owner,
-        //     creator: `${currentUser.data.name}[bot]`
-        //   }
-        //
-        // const allIssues: any[] = await context.octokit.paginate(
-        //   context.octokit.issues.listForRepo,
-        //   req,
-        //   ({ data }) => data
-        // )
-        //
-        // if (
-        //   !allIssues.some((issue) => issue.title === 'CHANGELOG.md is missing')
-        // ) {
-        //   const issue: RestEndpointMethodTypes['issues']['create']['parameters'] =
-        //     {
-        //       owner,
-        //       repo: repo.name,
-        //       title: 'CHANGELOG.md is missing',
-        //       body: 'You really should have a CHANGELOG.md'
-        //     }
-        //   await context.octokit.issues.create(issue)
-        // }
-
         return
       }
     }
