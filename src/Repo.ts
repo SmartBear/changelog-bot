@@ -2,6 +2,7 @@ import { ProbotOctokit } from 'probot'
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods'
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { Issue } from './model/Issue'
 
 interface Context {
   octokit: InstanceType<typeof ProbotOctokit>
@@ -32,6 +33,21 @@ export class Repo {
     public owner: string,
     public name: string
   ) {}
+
+  public async getCommentsForIssue(issue: Issue) {
+    const request: RestEndpointMethodTypes['issues']['listComments']['parameters'] =
+      {
+        owner: this.owner,
+        repo: this.name,
+        issue_number: issue.number
+      }
+
+    return this.octokit.paginate(
+      this.octokit.issues.listComments,
+      request,
+      ({ data }) => data
+    )
+  }
 
   public async getChangeLogContent(ref: string): Promise<string> {
     const { data } = await this.octokit.repos.getContent({

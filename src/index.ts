@@ -80,21 +80,14 @@ export = (app: Probot): void => {
       return
     }
 
-    // 1. Read the body of the changelog file
-    // --------------------------------------
-
     const repo = Repo.fromContext(context)
 
     // TODO: handle when there's no changelog file in the repo - do nothing - https://github.com/SmartBear/changelog-bot/issues/15
     const revision: string = context.payload.after
     const content = await repo.getChangeLogContent(revision)
-
-    // 2. Parse it, to relate releases to issues
-    // -----------------------------------------
     const changeLog = await ChangeLog.parse(content)
 
-    // 3. Comment on issues
-    // --------------------
+    // Comment on issues
     const currentUser = await context.octokit.apps.getAuthenticated()
     for (const release of changeLog.releases) {
       // Do not add comments for unreleased issues (yet)
@@ -102,18 +95,7 @@ export = (app: Probot): void => {
         continue
       }
       for (const issue of release.issues) {
-        const request: RestEndpointMethodTypes['issues']['listComments']['parameters'] =
-          {
-            owner,
-            repo: repo.name,
-            issue_number: issue.number
-          }
-
-        const allComments = await context.octokit.paginate(
-          context.octokit.issues.listComments,
-          request,
-          ({ data }) => data
-        )
+        const allComments = await repo.getCommentsForIssue(issue)
 
         // TODO: make this more robust - it doesn't work if the release header contains a date - https://github.com/SmartBear/changelog-bot/issues/18
         // copy/pasted from the web 🤞
@@ -124,7 +106,7 @@ export = (app: Probot): void => {
           .replace(/[^\w\- ]+/g, ' ')
           .replace(/\s+/g, '-')
           .replace(/-+$/, '')
-        const releaseUrl = `https://github.com/${owner}/${repo.name}/blob/${revision}/CHANGELOG.md#${anchor}`
+        const releaseUrl = `https://github.com/${repo.owner}/${repo.name}/blob/${revision}/CHANGELOG.md#${anchor}`
 
         const commentToAdd = `This was released in [${release.name}](${releaseUrl})`
 
@@ -145,7 +127,7 @@ export = (app: Probot): void => {
 
         const issueComment: RestEndpointMethodTypes['issues']['createComment']['parameters'] =
           {
-            owner,
+            owner: repo.owner,
             repo: repo.name,
             issue_number: issue.number,
             body: commentToAdd
