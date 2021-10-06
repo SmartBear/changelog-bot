@@ -162,6 +162,7 @@ export = (app: Probot): void => {
           ({ data }) => data
         )
 
+        // TODO: make this more robust - it doesn't work if the release header contains a date
         // copy/pasted from the web 🤞
         const anchor = release.name
           .trim()
