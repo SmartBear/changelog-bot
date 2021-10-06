@@ -81,11 +81,8 @@ class Repo {
 export = (app: Probot): void => {
   app.log.info('Starting up...')
 
-  app.onAny(async (context) => {
-    app.log.info(`${context.name} event received`)
-  })
-
   app.on('installation.created', async (context) => {
+    app.log.info(`${context.name} event received`)
     const owner = context.payload.installation.account.login
     for (const repository of context.payload.repositories) {
       const repo = new Repo(context.octokit, owner, repository.name)
@@ -110,6 +107,7 @@ export = (app: Probot): void => {
   })
 
   app.on('push', async (context) => {
+    app.log.info(`${context.name} event received`)
     if (
       context.payload.ref !==
       `refs/heads/${context.payload.repository.default_branch}`
