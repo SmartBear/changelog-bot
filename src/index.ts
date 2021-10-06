@@ -10,8 +10,7 @@ class Repo {
     private octokit: InstanceType<typeof ProbotOctokit>,
     private owner: string,
     public name: string
-  ) {
-  }
+  ) {}
 
   public async getChangeLogContent(ref: string): Promise<string> {
     const { data } = await this.octokit.repos.getContent({
@@ -33,13 +32,13 @@ class Repo {
       owner: this.owner,
       ref: `heads/${origin}`
     })
-    const branchName = "add-changelog";
+    const branchName = 'add-changelog'
     const createBranchParams: RestEndpointMethodTypes['git']['createRef']['parameters'] =
       {
         ref: `refs/heads/${branchName}`,
         sha: mainRef.data.object.sha,
         owner: this.owner,
-        repo: this.name,
+        repo: this.name
       }
     await this.octokit.rest.git.createRef(createBranchParams)
 
@@ -48,23 +47,25 @@ class Repo {
         owner: this.owner,
         repo: this.name,
         branch: branchName,
-        path: "CHANGELOG.md",
-        message: "A new and shiny changelog",
-        content: readFileSync(join(__dirname, 'CHANGELOG.md')).toString('base64')
+        path: 'CHANGELOG.md',
+        message: 'A new and shiny changelog',
+        content: readFileSync(join(__dirname, 'CHANGELOG.md')).toString(
+          'base64'
+        )
       }
-    this.octokit.repos.createOrUpdateFileContents(createFileParams)
+    await this.octokit.repos.createOrUpdateFileContents(createFileParams)
 
     const prParameters: RestEndpointMethodTypes['pulls']['create']['parameters'] =
       {
         owner: this.owner,
         repo: this.name,
-        title: "Keep A ChangeLog!",
+        title: 'Keep A ChangeLog!',
         head: branchName,
         base: origin,
         body: "You don't currently have a CHANGELOG.md file, this PR fixes that!"
       }
 
-    this.octokit.pulls.create(prParameters);
+    await this.octokit.pulls.create(prParameters)
   }
 }
 
@@ -105,7 +106,7 @@ export = (app: Probot): void => {
       }
       // create an issue if CHANGELOG.md cannot be found
       if (err.status == 404) {
-        app.log.info("CHANGELOG missing, creating PR")
+        app.log.info('CHANGELOG missing, creating PR')
         await repo.createPullRequest(context.payload.repository.default_branch)
         // const req: RestEndpointMethodTypes['issues']['listForRepo']['parameters'] =
         //   {
