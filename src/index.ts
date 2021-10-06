@@ -114,6 +114,29 @@ export = (app: Probot): void => {
 
     // STEPS:
 
+    // 0. Ignore a push that doesn't update the CHANGELOG
+    // TODO: handle if there are pages of commits
+    if (!pushIncludesChangesToChangeLog(context.payload.commits)) {
+      return
+    }
+
+    function pushIncludesChangesToChangeLog(
+      commits: { added: string[]; modified: string[]; removed: string[] }[]
+    ) {
+      for (const commit of commits) {
+        for (const file of [
+          ...commit.added,
+          ...commit.modified,
+          ...commit.removed
+        ]) {
+          if (file === 'CHANGELOG.md') {
+            return true
+          }
+        }
+      }
+      return false
+    }
+
     // 1. Read the body of the changelog file
     // --------------------------------------
 
@@ -128,14 +151,9 @@ export = (app: Probot): void => {
       owner,
       context.payload.repository.name
     )
-    let content = ''
-    try {
-      content = await repo.getChangeLogContent(ref)
-    } catch (err) {
-      if (!(err instanceof RequestError)) {
-        throw err
-      }
-    }
+
+    // TODO: handle when there's no changelog file in the repo - do nothing
+    const content = await repo.getChangeLogContent(ref)
 
     // 2. Parse it, to relate releases to issues
     // -----------------------------------------
