@@ -40,11 +40,7 @@ export class Repo {
       await this.getChangeLogContent(branch)
       return true
     } catch (err) {
-      if (!(err instanceof RequestError)) {
-        throw err
-      }
-      // create an issue if CHANGELOG.md cannot be found
-      if (err.status == 404) {
+      if (err instanceof RequestError && err.status == 404) {
         return false
       }
       throw err
