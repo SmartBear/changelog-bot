@@ -141,12 +141,6 @@ export = (app: Probot): void => {
       if (!(err instanceof RequestError)) {
         throw err
       }
-      // create an issue if CHANGELOG.md cannot be found
-      if (err.status == 404) {
-        app.log.info('CHANGELOG missing, creating PR')
-        await repo.createPullRequest(context.payload.repository.default_branch)
-        return
-      }
     }
 
     // 2. Parse it, to relate releases to issues
