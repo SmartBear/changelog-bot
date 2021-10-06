@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc",
     "prettier:format": "prettier --config .prettierrc 'src/**/*.ts' --write",
-    "start": "probot run ./lib/index.js",
+    "start": "probot run ./lib/src/index.js",
     "test": "mocha"
   },
   "dependencies": {
