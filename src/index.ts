@@ -34,6 +34,7 @@ class Repo {
     const repo = await this.octokit.repos.get(repoParams)
     return repo.data.default_branch
   }
+
   public async createPullRequest(origin: string) {
     const mainRef = await this.octokit.rest.git.getRef({
       repo: this.name,
