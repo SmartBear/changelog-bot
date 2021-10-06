@@ -180,7 +180,7 @@ export = (app: Probot): void => {
             issue_number: issue.number
           }
 
-        const allComments: any[] = await context.octokit.paginate(
+        const allComments = await context.octokit.paginate(
           context.octokit.issues.listComments,
           request,
           ({ data }) => data
@@ -199,9 +199,10 @@ export = (app: Probot): void => {
 
         const commentToAdd = `This was released in [${release.name}](${releaseUrl})`
 
-        const hasPreviousComment: boolean = allComments.some((comment) => {
+        const hasPreviousComment = allComments.some((comment) => {
           return (
             comment.body === commentToAdd &&
+            comment.user &&
             comment.user.login === `${currentUser.data.name}[bot]`
           )
         })
