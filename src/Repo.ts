@@ -1,3 +1,4 @@
+import { RequestError } from '@octokit/request-error'
 import { ProbotOctokit } from 'probot'
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods'
 import { readFileSync } from 'fs'
@@ -33,6 +34,22 @@ export class Repo {
     public owner: string,
     public name: string
   ) {}
+
+  public async hasChangeLogOn(branch: string): Promise<boolean> {
+    try {
+      await this.getChangeLogContent(branch)
+      return true
+    } catch (err) {
+      if (!(err instanceof RequestError)) {
+        throw err
+      }
+      // create an issue if CHANGELOG.md cannot be found
+      if (err.status == 404) {
+        return false
+      }
+      throw err
+    }
+  }
 
   public async getCommentsForIssue(issue: Issue) {
     const request: RestEndpointMethodTypes['issues']['listComments']['parameters'] =

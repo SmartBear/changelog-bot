@@ -1,5 +1,4 @@
 import { Probot } from 'probot'
-import { RequestError } from '@octokit/request-error'
 import { ChangeLog } from './model/ChangeLog'
 import { Repo } from './Repo'
 
@@ -11,22 +10,14 @@ export = (app: Probot): void => {
     const owner = context.payload.installation.account.login
     for (const repository of context.payload.repositories) {
       const repo = new Repo(context.octokit, owner, repository.name)
-
       const defaultBranch = await repo.getDefaultBranch()
 
-      try {
-        await repo.getChangeLogContent(defaultBranch)
+      if (await repo.hasChangeLogOn(defaultBranch)) {
         app.log.info('CHANGELOG.md exists, nothing to do')
         // TODO: could run a full scan here? https://github.com/SmartBear/changelog-bot/issues/16
-      } catch (err) {
-        if (!(err instanceof RequestError)) {
-          throw err
-        }
-        // create an issue if CHANGELOG.md cannot be found
-        if (err.status == 404) {
-          app.log.info('CHANGELOG missing, creating PR')
-          await repo.createPullRequest(defaultBranch)
-        }
+      } else {
+        app.log.info('CHANGELOG missing, creating PR')
+        await repo.createPullRequest(defaultBranch)
       }
     }
   })
