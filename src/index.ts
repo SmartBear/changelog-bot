@@ -28,8 +28,6 @@ export = (app: Probot): void => {
   app.log.info('Starting up...')
 
   app.on('push', async (context) => {
-    app.log.info(context)
-
     if (
       context.payload.ref !==
       `refs/heads/${context.payload.repository.default_branch}`
@@ -89,8 +87,6 @@ export = (app: Probot): void => {
         return
       }
     }
-
-    app.log.info(content)
 
     // 2. Parse it, to relate releases to issues
     // -----------------------------------------

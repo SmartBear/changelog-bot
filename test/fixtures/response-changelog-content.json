@@ -1,0 +1,18 @@
+{
+  "name": "CHANGELOG.md",
+  "path": "CHANGELOG.md",
+  "sha": "db4c2d1e484b653c37a03a038d2e4c28ffe2fbe6",
+  "size": 465,
+  "url": "https://api.github.com/repos/SmartBear/changelog-bot-test/contents/CHANGELOG.md?ref=main",
+  "html_url": "https://github.com/SmartBear/changelog-bot-test/blob/main/CHANGELOG.md",
+  "git_url": "https://api.github.com/repos/SmartBear/changelog-bot-test/git/blobs/db4c2d1e484b653c37a03a038d2e4c28ffe2fbe6",
+  "download_url": "https://raw.githubusercontent.com/SmartBear/changelog-bot-test/main/CHANGELOG.md",
+  "type": "file",
+  "content": "IyBDaGFuZ2Vsb2cKCkFsbCBub3RhYmxlIGNoYW5nZXMgdG8gdGhpcyBwcm9q\nZWN0IHdpbGwgYmUgZG9jdW1lbnRlZCBpbiB0aGlzIGZpbGUuCgpUaGUgZm9y\nbWF0IGlzIGJhc2VkIG9uIFtLZWVwIGEgQ2hhbmdlbG9nXShodHRwczovL2tl\nZXBhY2hhbmdlbG9nLmNvbS9lbi8xLjAuMC8pCmFuZCB0aGlzIHByb2plY3Qg\nYWRoZXJlcyB0byBbU2VtYW50aWMgVmVyc2lvbmluZ10oaHR0cHM6Ly9zZW12\nZXIub3JnL3NwZWMvdjIuMC4wLmh0bWwpLgoKIyMgW1VucmVsZWFzZWRdCgoj\nIyBbMS4wLjBdCgojIEZpeGVkOgotIEZpeGVkICMxCgpbVW5yZWxlYXNlZF06\nIGh0dHBzOi8vZ2l0aHViLmNvbS9zbWFydGJlYXIvY2hhbmdlbG9nLWJvdC10\nZXN0L2NvbXBhcmUvMS4wLjAuLi5IRUFEClsxLjAuMF06IGh0dHBzOi8vZ2l0\naHViLmNvbS9zbWFydGJlYXIvY2hhbmdlbG9nLWJvdC10ZXN0L2NvbXBhcmUv\ndjEuMC4wLi4uMS4wLjAK\n",
+  "encoding": "base64",
+  "_links": {
+    "self": "https://api.github.com/repos/SmartBear/changelog-bot-test/contents/CHANGELOG.md?ref=main",
+    "git": "https://api.github.com/repos/SmartBear/changelog-bot-test/git/blobs/db4c2d1e484b653c37a03a038d2e4c28ffe2fbe6",
+    "html": "https://github.com/SmartBear/changelog-bot-test/blob/main/CHANGELOG.md"
+  }
+}

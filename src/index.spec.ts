@@ -1,0 +1,89 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+import nock from 'nock'
+// Requiring our app implementation
+import app from '.'
+import { Probot, ProbotOctokit } from 'probot'
+import { readFileSync } from 'fs'
+import { join, resolve } from 'path'
+import { assertThat, equalTo } from 'hamjest'
+// Requiring our fixtures
+// const issueCreatedBody = { body: "Thanks for opening this issue!" };
+import payload from '../test/fixtures/push.update-changelog.json'
+
+const privateKey = readFileSync(
+  join(__dirname, '../test/fixtures/mock-cert.pem'),
+  'utf-8'
+)
+
+describe('ChangeBot', () => {
+  let probot: Probot
+
+  beforeEach(() => {
+    nock.disableNetConnect()
+    probot = new Probot({
+      appId: 123,
+      privateKey,
+      // disable request throttling and retries for testing
+      Octokit: ProbotOctokit.defaults({
+        retry: { enabled: false },
+        throttle: { enabled: false }
+      })
+    })
+    probot.load(app)
+  })
+
+  it('creates a comment on every issue in the CHANGELOG.md', async () => {
+    const mock = nock('https://api.github.com')
+      .get('/app')
+      .replyWithFile(
+        200,
+        resolve(__dirname, '../test/fixtures/response-app.json'),
+        { 'content-type': 'application/json; charset=utf-8' }
+      )
+      .post('/app/installations/19899812/access_tokens')
+      .reply(
+        200,
+        {
+          token: 'test',
+          permissions: {
+            contents: 'read',
+            issues: 'write',
+            metadata: 'read',
+            pull_requests: 'write'
+          }
+        },
+        { 'content-type': 'application/json; charset=utf-8' }
+      )
+      .get('/repos/SmartBear/changelog-bot-test/contents/CHANGELOG.md')
+      .query({ ref: '4a04b239c9f2c6f3876169a1100bb41156bdbde7' })
+      .replyWithFile(
+        200,
+        resolve(__dirname, '../test/fixtures/response-changelog-content.json'),
+        { 'content-type': 'application/json; charset=utf-8' }
+      )
+      .get('/repos/SmartBear/changelog-bot-test/issues/1/comments')
+      .replyWithFile(
+        200,
+        resolve(__dirname, '../test/fixtures/response-issue-comments.json'),
+        { 'content-type': 'application/json; charset=utf-8' }
+      )
+      .post('/repos/SmartBear/changelog-bot-test/issues/1/comments')
+      .reply(200)
+    await probot.receive({ id: 'push', name: 'push', payload })
+    assertThat(mock.pendingMocks(), equalTo([]))
+  })
+
+  afterEach(() => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+  })
+})
+
+// For more information about testing with Jest see:
+// https://facebook.github.io/jest/
+
+// For more information about using TypeScript in your tests, Jest recommends:
+// https://github.com/kulshekhar/ts-jest
+
+// For more information about testing with Nock see:
+// https://github.com/nock/nock

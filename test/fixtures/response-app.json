@@ -1,0 +1,41 @@
+{
+  "id": 142401,
+  "slug": "smartbear-changebot",
+  "node_id": "A_kwHOABkYf84AAixB",
+  "owner": {
+    "login": "SmartBear",
+    "id": 1644671,
+    "node_id": "MDEyOk9yZ2FuaXphdGlvbjE2NDQ2NzE=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/1644671?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/SmartBear",
+    "html_url": "https://github.com/SmartBear",
+    "followers_url": "https://api.github.com/users/SmartBear/followers",
+    "following_url": "https://api.github.com/users/SmartBear/following{/other_user}",
+    "gists_url": "https://api.github.com/users/SmartBear/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/SmartBear/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/SmartBear/subscriptions",
+    "organizations_url": "https://api.github.com/users/SmartBear/orgs",
+    "repos_url": "https://api.github.com/users/SmartBear/repos",
+    "events_url": "https://api.github.com/users/SmartBear/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/SmartBear/received_events",
+    "type": "Organization",
+    "site_admin": false
+  },
+  "name": "SmartBear ChangeBot",
+  "description": "Writes a comment in a completed issue or pull request linking to the version that it's been released in.",
+  "external_url": "https://smartbear.github.io/changelog-bot/",
+  "html_url": "https://github.com/apps/smartbear-changebot",
+  "created_at": "2021-10-04T15:57:21Z",
+  "updated_at": "2021-10-05T18:44:12Z",
+  "permissions": {
+    "contents": "read",
+    "issues": "write",
+    "metadata": "read",
+    "pull_requests": "write"
+  },
+  "events": [
+    "push"
+  ],
+  "installations_count": 1
+}
