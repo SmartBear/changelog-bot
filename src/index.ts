@@ -32,28 +32,25 @@ export = (app: Probot): void => {
     }
   })
 
-  app.on('push', async (context) => {
-    app.log.info(`${context.name} event received`)
-    if (
-      context.payload.ref !==
-      `refs/heads/${context.payload.repository.default_branch}`
-    ) {
-      app.log.info(`Ignoring push to non-default-branch ${context.payload.ref}`)
-      return
+  interface PushPayload {
+    repository: { default_branch: string }
+    ref: string
+    commits: { added: string[]; modified: string[]; removed: string[] }[]
+  }
+
+  class Push {
+    constructor(private readonly payload: PushPayload) {}
+
+    get isToDefaultBranch(): boolean {
+      return this.ref == `refs/heads/${this.payload.repository.default_branch}`
     }
 
-    // STEPS:
-
-    // 0. Ignore a push that doesn't update the CHANGELOG
-    // TODO: handle if there are pages of commits - https://github.com/SmartBear/changelog-bot/issues/17
-    if (!pushIncludesChangesToChangeLog(context.payload.commits)) {
-      return
+    get ref(): string {
+      return this.payload.ref
     }
 
-    function pushIncludesChangesToChangeLog(
-      commits: { added: string[]; modified: string[]; removed: string[] }[]
-    ) {
-      for (const commit of commits) {
+    get touchesChangelog(): boolean {
+      for (const commit of this.payload.commits) {
         for (const file of [
           ...commit.added,
           ...commit.modified,
@@ -66,6 +63,22 @@ export = (app: Probot): void => {
       }
       return false
     }
+  }
+
+  app.on('push', async (context) => {
+    app.log.info(`${context.name} event received`)
+    const push = new Push(context.payload)
+
+    if (!push.isToDefaultBranch) {
+      app.log.info(`Ignoring push to non-default ref ${push.ref}`)
+      return
+    }
+
+    // TODO: handle if there are pages of commits - https://github.com/SmartBear/changelog-bot/issues/17
+    if (!push.touchesChangelog) {
+      app.log.info(`Ignoring push that does not touch CHANGELOG.md`)
+      return
+    }
 
     // 1. Read the body of the changelog file
     // --------------------------------------
@@ -74,7 +87,7 @@ export = (app: Probot): void => {
       context.payload.organization?.login ||
       context.payload.repository.owner.login ||
       ''
-    const ref: string = context.payload.after
+    const revision: string = context.payload.after
     const currentUser = await context.octokit.apps.getAuthenticated()
     const repo = new Repo(
       context.octokit,
@@ -83,7 +96,7 @@ export = (app: Probot): void => {
     )
 
     // TODO: handle when there's no changelog file in the repo - do nothing - https://github.com/SmartBear/changelog-bot/issues/15
-    const content = await repo.getChangeLogContent(ref)
+    const content = await repo.getChangeLogContent(revision)
 
     // 2. Parse it, to relate releases to issues
     // -----------------------------------------
@@ -119,7 +132,7 @@ export = (app: Probot): void => {
           .replace(/[^\w\- ]+/g, ' ')
           .replace(/\s+/g, '-')
           .replace(/-+$/, '')
-        const releaseUrl = `https://github.com/${owner}/${repo.name}/blob/${ref}/CHANGELOG.md#${anchor}`
+        const releaseUrl = `https://github.com/${owner}/${repo.name}/blob/${revision}/CHANGELOG.md#${anchor}`
 
         const commentToAdd = `This was released in [${release.name}](${releaseUrl})`
 
