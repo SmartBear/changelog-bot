@@ -83,19 +83,10 @@ export = (app: Probot): void => {
     // 1. Read the body of the changelog file
     // --------------------------------------
 
-    const owner: string =
-      context.payload.organization?.login ||
-      context.payload.repository.owner.login ||
-      ''
-    const revision: string = context.payload.after
-    const currentUser = await context.octokit.apps.getAuthenticated()
-    const repo = new Repo(
-      context.octokit,
-      owner,
-      context.payload.repository.name
-    )
+    const repo = Repo.fromContext(context)
 
     // TODO: handle when there's no changelog file in the repo - do nothing - https://github.com/SmartBear/changelog-bot/issues/15
+    const revision: string = context.payload.after
     const content = await repo.getChangeLogContent(revision)
 
     // 2. Parse it, to relate releases to issues
@@ -104,6 +95,7 @@ export = (app: Probot): void => {
 
     // 3. Comment on issues
     // --------------------
+    const currentUser = await context.octokit.apps.getAuthenticated()
     for (const release of changeLog.releases) {
       // Do not add comments for unreleased issues (yet)
       if (release.name.toLowerCase().includes('unreleased')) {
