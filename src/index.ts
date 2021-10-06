@@ -18,7 +18,7 @@ export = (app: Probot): void => {
       try {
         await repo.getChangeLogContent(defaultBranch)
         app.log.info('CHANGELOG.md exists, nothing to do')
-        // TODO: could run a full scan here?
+        // TODO: could run a full scan here? https://github.com/SmartBear/changelog-bot/issues/16
       } catch (err) {
         if (!(err instanceof RequestError)) {
           throw err
@@ -45,7 +45,7 @@ export = (app: Probot): void => {
     // STEPS:
 
     // 0. Ignore a push that doesn't update the CHANGELOG
-    // TODO: handle if there are pages of commits
+    // TODO: handle if there are pages of commits - https://github.com/SmartBear/changelog-bot/issues/17
     if (!pushIncludesChangesToChangeLog(context.payload.commits)) {
       return
     }
@@ -82,7 +82,7 @@ export = (app: Probot): void => {
       context.payload.repository.name
     )
 
-    // TODO: handle when there's no changelog file in the repo - do nothing
+    // TODO: handle when there's no changelog file in the repo - do nothing - https://github.com/SmartBear/changelog-bot/issues/15
     const content = await repo.getChangeLogContent(ref)
 
     // 2. Parse it, to relate releases to issues
@@ -110,7 +110,7 @@ export = (app: Probot): void => {
           ({ data }) => data
         )
 
-        // TODO: make this more robust - it doesn't work if the release header contains a date
+        // TODO: make this more robust - it doesn't work if the release header contains a date - https://github.com/SmartBear/changelog-bot/issues/18
         // copy/pasted from the web 🤞
         const anchor = release.name
           .trim()
