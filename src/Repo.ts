@@ -113,4 +113,15 @@ export class Repo {
 
     await this.octokit.pulls.create(prParameters)
   }
+
+  async createIssueComment(issue: Issue, commentToAdd: string): Promise<void> {
+    const issueComment: RestEndpointMethodTypes['issues']['createComment']['parameters'] =
+      {
+        owner: this.owner,
+        repo: this.name,
+        issue_number: issue.number,
+        body: commentToAdd
+      }
+    await this.octokit.issues.createComment(issueComment)
+  }
 }

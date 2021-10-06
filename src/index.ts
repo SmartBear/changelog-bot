@@ -1,6 +1,5 @@
 import { Probot } from 'probot'
 import { RequestError } from '@octokit/request-error'
-import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods'
 import { ChangeLog } from './model/ChangeLog'
 import { Repo } from './Repo'
 
@@ -125,14 +124,7 @@ export = (app: Probot): void => {
           continue
         }
 
-        const issueComment: RestEndpointMethodTypes['issues']['createComment']['parameters'] =
-          {
-            owner: repo.owner,
-            repo: repo.name,
-            issue_number: issue.number,
-            body: commentToAdd
-          }
-        await context.octokit.issues.createComment(issueComment)
+        await repo.createIssueComment(issue, commentToAdd)
       }
     }
   })
