@@ -41,7 +41,7 @@ class Repo {
       owner: this.owner,
       ref: `heads/${origin}`
     })
-    const branchName = 'add-changelog'
+    const branchName = 'smartbear/changebot/add-changelog'
     const createBranchParams: RestEndpointMethodTypes['git']['createRef']['parameters'] =
       {
         ref: `refs/heads/${branchName}`,
@@ -82,8 +82,6 @@ export = (app: Probot): void => {
   app.log.info('Starting up...')
 
   app.on('installation.created', async (context) => {
-    app.log.info(context)
-
     const owner = context.payload.installation.account.login
     for (const repository of context.payload.repositories){
       const repo = new Repo(

@@ -102,13 +102,13 @@ describe('ChangeBot', () => {
         { 'content-type': 'application/json; charset=utf-8' }
       )
       .post('/repos/SmartBear/changelog-bot-test/git/refs', {
-        ref: 'refs/heads/add-changelog',
+        ref: 'refs/heads/smartbear/changebot/add-changelog',
         sha: 'aa218f56b14c9653891f9e74264a383fa43fefbd'
       })
       .reply(201, {
-        ref: 'refs/heads/add-changelog',
+        ref: 'refs/heads/smartbear/changebot/add-changelog',
         node_id: 'MDM6UmVmcmVmcy9oZWFkcy9mZWF0dXJlQQ==',
-        url: 'https://api.github.com/repos/SmartBear/changelog-bot-test/git/refs/heads/add-changelog',
+        url: 'https://api.github.com/repos/SmartBear/changelog-bot-test/git/refs/heads/smartbear/changebot/add-changelog',
         object: {
           type: 'commit',
           sha: 'aa218f56b14c9653891f9e74264a383fa43fefbd',
@@ -120,12 +120,12 @@ describe('ChangeBot', () => {
         content: readFileSync(join(__dirname, 'CHANGELOG.md')).toString(
           'base64'
         ),
-        branch: 'add-changelog'
+        branch: 'smartbear/changebot/add-changelog'
       })
       .reply(200)
       .post('/repos/SmartBear/changelog-bot-test/pulls', {
         title: 'Keep A ChangeLog!',
-        head: 'add-changelog',
+        head: 'smartbear/changebot/add-changelog',
         base: 'main',
         body: "You don't currently have a CHANGELOG.md file, this PR fixes that!"
       })
