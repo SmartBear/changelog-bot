@@ -1,0 +1,80 @@
+{
+  "action": "created",
+  "installation": {
+    "id": 19940111,
+    "account": {
+      "login": "SmartBear",
+      "id": 1644671,
+      "node_id": "MDEyOk9yZ2FuaXphdGlvbjE2NDQ2NzE=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1644671?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/SmartBear",
+      "html_url": "https://github.com/SmartBear",
+      "followers_url": "https://api.github.com/users/SmartBear/followers",
+      "following_url": "https://api.github.com/users/SmartBear/following{/other_user}",
+      "gists_url": "https://api.github.com/users/SmartBear/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/SmartBear/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/SmartBear/subscriptions",
+      "organizations_url": "https://api.github.com/users/SmartBear/orgs",
+      "repos_url": "https://api.github.com/users/SmartBear/repos",
+      "events_url": "https://api.github.com/users/SmartBear/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/SmartBear/received_events",
+      "type": "Organization",
+      "site_admin": false
+    },
+    "repository_selection": "selected",
+    "access_tokens_url": "https://api.github.com/app/installations/19940111/access_tokens",
+    "repositories_url": "https://api.github.com/installation/repositories",
+    "html_url": "https://github.com/organizations/SmartBear/settings/installations/19940111",
+    "app_id": 142401,
+    "app_slug": "smartbear-changebot",
+    "target_id": 1644671,
+    "target_type": "Organization",
+    "permissions": {
+      "issues": "write",
+      "contents": "write",
+      "metadata": "read",
+      "pull_requests": "write"
+    },
+    "events": [
+      "push"
+    ],
+    "created_at": "2021-10-06T15:45:53.000+02:00",
+    "updated_at": "2021-10-06T15:45:53.000+02:00",
+    "single_file_name": null,
+    "has_multiple_single_files": false,
+    "single_file_paths": [],
+    "suspended_by": null,
+    "suspended_at": null
+  },
+  "repositories": [
+    {
+      "id": 413548679,
+      "node_id": "R_kgDOGKZAhw",
+      "name": "changelog-bot-test",
+      "full_name": "SmartBear/changelog-bot-test",
+      "private": false
+    }
+  ],
+  "requester": null,
+  "sender": {
+    "login": "andersjaensson",
+    "id": 5259786,
+    "node_id": "MDQ6VXNlcjUyNTk3ODY=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/5259786?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/andersjaensson",
+    "html_url": "https://github.com/andersjaensson",
+    "followers_url": "https://api.github.com/users/andersjaensson/followers",
+    "following_url": "https://api.github.com/users/andersjaensson/following{/other_user}",
+    "gists_url": "https://api.github.com/users/andersjaensson/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/andersjaensson/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/andersjaensson/subscriptions",
+    "organizations_url": "https://api.github.com/users/andersjaensson/orgs",
+    "repos_url": "https://api.github.com/users/andersjaensson/repos",
+    "events_url": "https://api.github.com/users/andersjaensson/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/andersjaensson/received_events",
+    "type": "User",
+    "site_admin": false
+  }
+}

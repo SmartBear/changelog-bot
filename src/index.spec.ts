@@ -9,6 +9,7 @@ import { assertThat, equalTo } from 'hamjest'
 // Requiring our fixtures
 // const issueCreatedBody = { body: "Thanks for opening this issue!" };
 import payload from '../test/fixtures/push.update-changelog.json'
+import installationPayload from '../test/fixtures/installation.created.json'
 
 const privateKey = readFileSync(
   join(__dirname, '../test/fixtures/mock-cert.pem'),
@@ -73,7 +74,7 @@ describe('ChangeBot', () => {
     assertThat(mock.pendingMocks(), equalTo([]))
   })
 
-  it('Creates a pull request if there is no CHANGELOG.md in the repo', async () => {
+  it('Creates a pull request on push if there is no CHANGELOG.md in the repo', async () => {
     const mock = nock('https://api.github.com')
       .get('/app')
       .replyWithFile(
@@ -133,10 +134,69 @@ describe('ChangeBot', () => {
         body: "You don't currently have a CHANGELOG.md file, this PR fixes that!"
       })
       .reply(201)
-    // create ref (octokit.rest.git.createRef)
-    // create or update file (octokit.repos.createOrUpdateFile)
-    // create pull request
     await probot.receive({ id: 'push', name: 'push', payload })
+
+    assertThat(mock.pendingMocks(), equalTo([]))
+  })
+
+  it('creates pull request on installation if there is no CHANGELOG.md in the repo', async () => {
+    const mock = nock('https://api.github.com')
+      .post('/app/installations/19940111/access_tokens')
+      .reply(
+        200,
+        {
+          token: 'test',
+          permissions: {
+            contents: 'read',
+            issues: 'write',
+            metadata: 'read',
+            pull_requests: 'write'
+          }
+        },
+        { 'content-type': 'application/json; charset=utf-8' }
+      )
+      .get('/repos/SmartBear/changelog-bot-test')
+      .reply(200,  { default_branch: 'main' })
+      .get('/repos/SmartBear/changelog-bot-test/contents/CHANGELOG.md')
+      .query({ref: "main"})
+      .reply(404)
+      .get('/repos/SmartBear/changelog-bot-test/git/ref/heads%2Fmain')
+      .replyWithFile(
+        200,
+        resolve(__dirname, '../test/fixtures/response-main-ref.json'),
+        { 'content-type': 'application/json; charset=utf-8' }
+      )
+      .post('/repos/SmartBear/changelog-bot-test/git/refs', {
+        ref: 'refs/heads/add-changelog',
+        sha: 'aa218f56b14c9653891f9e74264a383fa43fefbd'
+      })
+      .reply(201, {
+        ref: 'refs/heads/add-changelog',
+        node_id: 'MDM6UmVmcmVmcy9oZWFkcy9mZWF0dXJlQQ==',
+        url: 'https://api.github.com/repos/SmartBear/changelog-bot-test/git/refs/heads/add-changelog',
+        object: {
+          type: 'commit',
+          sha: 'aa218f56b14c9653891f9e74264a383fa43fefbd',
+          url: 'https://api.github.com/repos/SmartBear/changelog-bot-test/git/commits/aa218f56b14c9653891f9e74264a383fa43fefbd'
+        }
+      })
+      .put('/repos/SmartBear/changelog-bot-test/contents/CHANGELOG.md', {
+        message: 'A new and shiny changelog',
+        content: readFileSync(join(__dirname, 'CHANGELOG.md')).toString(
+          'base64'
+        ),
+        branch: 'add-changelog'
+      })
+      .reply(200)
+      .post('/repos/SmartBear/changelog-bot-test/pulls', {
+        title: 'Keep A ChangeLog!',
+        head: 'add-changelog',
+        base: 'main',
+        body: "You don't currently have a CHANGELOG.md file, this PR fixes that!"
+      })
+      .reply(201)
+
+    await probot.receive({ id: 'installation', name: 'installation.created', payload: installationPayload })
 
     assertThat(mock.pendingMocks(), equalTo([]))
   })

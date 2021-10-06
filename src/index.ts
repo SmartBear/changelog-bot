@@ -27,13 +27,13 @@ class Repo {
   }
 
   public async getDefaultBranch(): Promise<string> {
-    const branchparmas: RestEndpointMethodTypes['repos']['get']['parameters'] =
+    const repoParams: RestEndpointMethodTypes['repos']['get']['parameters'] =
       {
         owner: this.owner,
         repo: this.name,
       }
-    const branches = await this.octokit.repos.get(branchparmas)
-    return branches.data.default_branch
+    const repo = await this.octokit.repos.get(repoParams)
+    return repo.data.default_branch
   }
   public async createPullRequest(origin: string) {
     const mainRef = await this.octokit.rest.git.getRef({
