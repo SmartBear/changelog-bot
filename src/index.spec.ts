@@ -91,9 +91,9 @@ describe('ChangeBot', () => {
         { 'content-type': 'application/json; charset=utf-8' }
       )
       .get('/repos/SmartBear/changelog-bot-test')
-      .reply(200,  { default_branch: 'main' })
+      .reply(200, { default_branch: 'main' })
       .get('/repos/SmartBear/changelog-bot-test/contents/CHANGELOG.md')
-      .query({ref: "main"})
+      .query({ ref: 'main' })
       .reply(404)
       .get('/repos/SmartBear/changelog-bot-test/git/ref/heads%2Fmain')
       .replyWithFile(
@@ -131,7 +131,11 @@ describe('ChangeBot', () => {
       })
       .reply(201)
 
-    await probot.receive({ id: 'installation', name: 'installation.created', payload: installationPayload })
+    await probot.receive({
+      id: 'installation',
+      name: 'installation.created',
+      payload: installationPayload
+    })
 
     assertThat(mock.pendingMocks(), equalTo([]))
   })

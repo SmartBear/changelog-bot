@@ -27,11 +27,10 @@ class Repo {
   }
 
   public async getDefaultBranch(): Promise<string> {
-    const repoParams: RestEndpointMethodTypes['repos']['get']['parameters'] =
-      {
-        owner: this.owner,
-        repo: this.name,
-      }
+    const repoParams: RestEndpointMethodTypes['repos']['get']['parameters'] = {
+      owner: this.owner,
+      repo: this.name
+    }
     const repo = await this.octokit.repos.get(repoParams)
     return repo.data.default_branch
   }
@@ -83,12 +82,8 @@ export = (app: Probot): void => {
 
   app.on('installation.created', async (context) => {
     const owner = context.payload.installation.account.login
-    for (const repository of context.payload.repositories){
-      const repo = new Repo(
-        context.octokit,
-        owner,
-        repository.name
-      )
+    for (const repository of context.payload.repositories) {
+      const repo = new Repo(context.octokit, owner, repository.name)
 
       const defaultBranch = await repo.getDefaultBranch()
 
@@ -100,7 +95,7 @@ export = (app: Probot): void => {
         }
         // create an issue if CHANGELOG.md cannot be found
         if (err.status == 404) {
-          app.log.info("CHANGELOG missing, creating PR")
+          app.log.info('CHANGELOG missing, creating PR')
           await repo.createPullRequest(defaultBranch)
         }
       }
