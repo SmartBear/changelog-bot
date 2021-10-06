@@ -58,10 +58,10 @@ class Repo {
       {
         owner: this.owner,
         repo: this.name,
-        title: "A changelog pr",
+        title: "Keep A ChangeLog!",
         head: branchName,
         base: origin,
-        body: "the body of the pr"
+        body: "You don't currently have a CHANGELOG.md file, this PR fixes that!"
       }
 
     this.octokit.pulls.create(prParameters);
