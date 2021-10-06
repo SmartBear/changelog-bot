@@ -1,6 +1,8 @@
 import { Probot, ProbotOctokit } from 'probot'
 import { RequestError } from '@octokit/request-error'
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import { ChangeLog } from './model/ChangeLog'
 
 class Repo {
@@ -22,6 +24,48 @@ class Repo {
       throw new Error('CHANGELOG is not a file!')
     }
     return Buffer.from(data.content, 'base64').toString()
+  }
+
+  public async createPullRequest(origin: string) {
+    const mainRef = await this.octokit.rest.git.getRef({
+      repo: this.name,
+      owner: this.owner,
+      ref: `heads/${origin}`
+    })
+    const branchName = 'add-changelog'
+    const createBranchParams: RestEndpointMethodTypes['git']['createRef']['parameters'] =
+      {
+        ref: `refs/heads/${branchName}`,
+        sha: mainRef.data.object.sha,
+        owner: this.owner,
+        repo: this.name
+      }
+    await this.octokit.rest.git.createRef(createBranchParams)
+
+    const createFileParams: RestEndpointMethodTypes['repos']['createOrUpdateFileContents']['parameters'] =
+      {
+        owner: this.owner,
+        repo: this.name,
+        branch: branchName,
+        path: 'CHANGELOG.md',
+        message: 'A new and shiny changelog',
+        content: readFileSync(join(__dirname, 'CHANGELOG.md')).toString(
+          'base64'
+        )
+      }
+    await this.octokit.repos.createOrUpdateFileContents(createFileParams)
+
+    const prParameters: RestEndpointMethodTypes['pulls']['create']['parameters'] =
+      {
+        owner: this.owner,
+        repo: this.name,
+        title: 'Keep A ChangeLog!',
+        head: branchName,
+        base: origin,
+        body: "You don't currently have a CHANGELOG.md file, this PR fixes that!"
+      }
+
+    await this.octokit.pulls.create(prParameters)
   }
 }
 
@@ -62,31 +106,33 @@ export = (app: Probot): void => {
       }
       // create an issue if CHANGELOG.md cannot be found
       if (err.status == 404) {
-        const req: RestEndpointMethodTypes['issues']['listForRepo']['parameters'] =
-          {
-            repo: repo.name,
-            owner,
-            creator: `${currentUser.data.name}[bot]`
-          }
-
-        const allIssues: any[] = await context.octokit.paginate(
-          context.octokit.issues.listForRepo,
-          req,
-          ({ data }) => data
-        )
-
-        if (
-          !allIssues.some((issue) => issue.title === 'CHANGELOG.md is missing')
-        ) {
-          const issue: RestEndpointMethodTypes['issues']['create']['parameters'] =
-            {
-              owner,
-              repo: repo.name,
-              title: 'CHANGELOG.md is missing',
-              body: 'You really should have a CHANGELOG.md'
-            }
-          await context.octokit.issues.create(issue)
-        }
+        app.log.info('CHANGELOG missing, creating PR')
+        await repo.createPullRequest(context.payload.repository.default_branch)
+        // const req: RestEndpointMethodTypes['issues']['listForRepo']['parameters'] =
+        //   {
+        //     repo: repo.name,
+        //     owner,
+        //     creator: `${currentUser.data.name}[bot]`
+        //   }
+        //
+        // const allIssues: any[] = await context.octokit.paginate(
+        //   context.octokit.issues.listForRepo,
+        //   req,
+        //   ({ data }) => data
+        // )
+        //
+        // if (
+        //   !allIssues.some((issue) => issue.title === 'CHANGELOG.md is missing')
+        // ) {
+        //   const issue: RestEndpointMethodTypes['issues']['create']['parameters'] =
+        //     {
+        //       owner,
+        //       repo: repo.name,
+        //       title: 'CHANGELOG.md is missing',
+        //       body: 'You really should have a CHANGELOG.md'
+        //     }
+        //   await context.octokit.issues.create(issue)
+        // }
 
         return
       }
