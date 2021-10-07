@@ -157,7 +157,7 @@ describe('ChangeBot', () => {
       )
       .post(
         '/repos/SmartBear/changelog-bot-test/issues/1/comments',
-        /This was released in \[1.0.0]\(https:\/\/github.com\/SmartBear\/changelog-bot-test\/blob\/main\/CHANGELOG.md#100\)/
+        /This change was released in \[1.0.0]\(https:\/\/github.com\/SmartBear\/changelog-bot-test\/blob\/main\/CHANGELOG.md#100\)/
       )
       .reply(200)
     await probot.receive({

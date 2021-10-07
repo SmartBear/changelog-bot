@@ -107,7 +107,7 @@ export = (app: Probot): void => {
         const anchor = GitHubHeadingAnchor.to(release.name)
         const releaseUrl = `https://github.com/${repo.owner}/${repo.name}/blob/${defaultBranch}/CHANGELOG.md#${anchor}`
 
-        const commentToAdd = `This was released in [${release.name}](${releaseUrl})`
+        const commentToAdd = `🎉 This change was released in [${release.name}](${releaseUrl}) 🚀`
 
         const hasPreviousComment = allComments.some((comment) => {
           return (
@@ -123,6 +123,9 @@ export = (app: Probot): void => {
           continue
         }
 
+        app.log.debug(
+          `Adding a comment to link issue ${issue.number} to release ${release.name}`
+        )
         await repo.createIssueComment(issue, commentToAdd)
       }
     }
