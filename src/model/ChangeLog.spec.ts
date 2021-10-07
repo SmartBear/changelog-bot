@@ -1,4 +1,4 @@
-import { assertThat, equalTo } from 'hamjest'
+import { assertThat, containsInAnyOrder, equalTo } from 'hamjest'
 import { ChangeLog } from './ChangeLog'
 import { Release } from './Release'
 import { Issue } from './Issue'
@@ -78,10 +78,52 @@ describe(ChangeLog.name, () => {
     assertThat(changeLog.releases[1].name, equalTo('7.3.0'))
     assertThat(
       changeLog.releases[1].issues.map((issue) => issue.number),
-      equalTo([
-        1645, 1408, 1669, 1667, 1690, 1579, 1669, 1302, 1568, 1534, 1672, 1621,
-        1651
-      ])
+      containsInAnyOrder(
+        1302,
+        1408,
+        1534,
+        1568,
+        1579,
+        1621,
+        1645,
+        1651,
+        1667,
+        1669,
+        1672,
+        1690
+      )
+    )
+  })
+
+  it('can find issues with a link but no preceding "#"', async () => {
+    const content = `
+## [1.2.3]
+### Fixed
+- It's broken #1
+- It's even more broken [2](https://github.com/owner/repo/issues/2)
+- Here's a fix [3](https://github.com/owner/repo/pulls/3)
+    `
+    const changeLog = await ChangeLog.parse(content)
+    assertThat(
+      changeLog.releases[0].issues.map((issue) => issue.number),
+      equalTo([1, 2, 3])
+    )
+  })
+
+  it('does not return duplicates', async () => {
+    const content = `
+## [1.2.3]
+### Fixed
+- It's broken #1
+- It's broken again #1
+- It's even more broken [#2](https://github.com/owner/repo/issues/2)
+- Here's a fix [3](https://github.com/owner/repo/pulls/3)
+- Here's a fix again [#3](https://github.com/owner/repo/pulls/3)
+    `
+    const changeLog = await ChangeLog.parse(content)
+    assertThat(
+      changeLog.releases[0].issues.map((issue) => issue.number),
+      equalTo([1, 2, 3])
     )
   })
 })

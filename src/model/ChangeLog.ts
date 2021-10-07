@@ -20,11 +20,22 @@ export class ChangeLog {
   }
 
   private static findIssues(body: string) {
-    const matches = body.match(new RegExp('(#\\d+)', 'mg'))
+    const hashMarked = Array.from(body.matchAll(new RegExp('#(\\d+)', 'mg')))
+    const linked = Array.from(
+      body.matchAll(
+        new RegExp('\\bhttps://github.com/.+/(?:pulls|issues)/(\\d+)\\b', 'mg')
+      )
+    )
+    const matches = [
+      ...Array.from(hashMarked || []),
+      ...Array.from(linked || [])
+    ]
     if (!matches) {
       return []
     }
-    return matches.map((match) => new Issue(parseInt(match.replace('#', ''))))
+    return [
+      ...Array.from(new Set(matches.map(([_, match]) => parseInt(match))))
+    ].map((number) => new Issue(number))
   }
 
   constructor(public releases: Release[]) {}
