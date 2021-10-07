@@ -2,6 +2,7 @@ import { Probot } from 'probot'
 import { ChangeLog } from './model/ChangeLog'
 import { IssueComments, Repo } from './Repo'
 import { RequestError } from '@octokit/request-error'
+import { GitHubHeadingAnchor } from './GitHubHeadingAnchor'
 
 export = (app: Probot): void => {
   app.log.info('Starting up...')
@@ -103,15 +104,7 @@ export = (app: Probot): void => {
           throw err
         }
 
-        // TODO: make this more robust - it doesn't work if the release header contains a date - https://github.com/SmartBear/changelog-bot/issues/18
-        // copy/pasted from the web 🤞
-        const anchor = release.name
-          .trim()
-          .toLowerCase()
-          .replace(/\./g, '')
-          .replace(/[^\w\- ]+/g, ' ')
-          .replace(/\s+/g, '-')
-          .replace(/-+$/, '')
+        const anchor = GitHubHeadingAnchor.to(release.name)
         const releaseUrl = `https://github.com/${repo.owner}/${repo.name}/blob/${defaultBranch}/CHANGELOG.md#${anchor}`
 
         const commentToAdd = `This was released in [${release.name}](${releaseUrl})`
