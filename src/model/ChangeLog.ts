@@ -10,8 +10,7 @@ export class ChangeLog {
       })
       const releases = result.versions.map((version) => {
         const issues = ChangeLog.findIssues(version.body)
-        const release = new Release(version.version || version.title, issues)
-        return release
+        return new Release(version.version || version.title, issues)
       })
       return new ChangeLog(releases)
     } catch (error) {
