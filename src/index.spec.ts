@@ -81,7 +81,8 @@ describe('ChangeBot', () => {
         resolve(__dirname, '../test/fixtures/response-issue-comments.json'),
         { 'content-type': 'application/json; charset=utf-8' }
       )
-      .post('/repos/SmartBear/changelog-bot-test/issues/1/comments')
+      .post('/repos/SmartBear/changelog-bot-test/issues/1/comments',
+        /This was released in \[1.0.0]\(https:\/\/github.com\/SmartBear\/changelog-bot-test\/blob\/main\/CHANGELOG.md#100\)/)
       .reply(200)
     await probot.receive({ id: 'push', name: 'push', payload })
     assertThat(mock.pendingMocks(), equalTo([]))

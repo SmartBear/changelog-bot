@@ -39,6 +39,10 @@ export = (app: Probot): void => {
       return this.payload.ref
     }
 
+    get defaultBranch(): string {
+      return this.payload.repository.default_branch
+    }
+
     get touchesChangelog(): boolean {
       for (const commit of this.payload.commits) {
         for (const file of [
@@ -96,7 +100,7 @@ export = (app: Probot): void => {
           .replace(/[^\w\- ]+/g, ' ')
           .replace(/\s+/g, '-')
           .replace(/-+$/, '')
-        const releaseUrl = `https://github.com/${repo.owner}/${repo.name}/blob/${revision}/CHANGELOG.md#${anchor}`
+        const releaseUrl = `https://github.com/${repo.owner}/${repo.name}/blob/${push.defaultBranch}/CHANGELOG.md#${anchor}`
 
         const commentToAdd = `This was released in [${release.name}](${releaseUrl})`
 
