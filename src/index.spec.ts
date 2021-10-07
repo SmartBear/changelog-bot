@@ -3,15 +3,43 @@ import nock from 'nock'
 // Requiring our app implementation
 import app from '.'
 import { Probot, ProbotOctokit } from 'probot'
+import { PushEvent, InstallationCreatedEvent } from '@octokit/webhooks-types'
+import type { WebhookEventMap, WebhookEventName } from '@octokit/webhooks-types'
 import { readFileSync } from 'fs'
 import { join, resolve } from 'path'
 import { assertThat, equalTo } from 'hamjest'
-// Requiring our fixtures
-// const issueCreatedBody = { body: "Thanks for opening this issue!" };
-import payload from '../test/fixtures/push.update-changelog.json'
-import payloadNoChanges from '../test/fixtures/push.not-updating-changelog.json'
-import payloadRemoveChangelog from '../test/fixtures/push.delete-changelog.json'
-import installationPayload from '../test/fixtures/installation.created.json'
+
+type LoadsFixtures = <EventName extends WebhookEventName>(
+  name: EventName,
+  path: string
+) => WebhookEventMap[EventName]
+
+const payloadFixture: LoadsFixtures = <EventName extends WebhookEventName>(
+  name: EventName,
+  path: string
+) => {
+  const rawPayload: unknown = JSON.parse(
+    readFileSync(join(__dirname, path), 'utf-8')
+  )
+  return rawPayload as WebhookEventMap[EventName]
+}
+
+const payload = payloadFixture(
+  'push',
+  '../test/fixtures/push.update-changelog.json'
+)
+const payloadNoChanges = payloadFixture(
+  'push',
+  '../test/fixtures/push.not-updating-changelog.json'
+)
+const installationPayload = payloadFixture(
+  'installation',
+  '../test/fixtures/installation.created.json'
+)
+const payloadRemoveChangelog = payloadFixture(
+  'push',
+  '../test/fixtures/push.delete-changelog.json'
+)
 
 const privateKey = readFileSync(
   join(__dirname, '../test/fixtures/mock-cert.pem'),
@@ -41,7 +69,7 @@ describe('ChangeBot', () => {
         await probot.receive({
           id: 'push',
           name: 'push',
-          payload: payloadNoChanges
+          payload: payloadNoChanges as PushEvent
         })
       })
     })
@@ -54,42 +82,48 @@ describe('ChangeBot', () => {
         })
       })
     })
-    context('when and issue mentioned in the changelog is missing', async () => {
-      it('does not try to add a comment', async () => {
-        const mock = nock('https://api.github.com')
-          .get('/app')
-          .replyWithFile(
-            200,
-            resolve(__dirname, '../test/fixtures/response-app.json'),
-            { 'content-type': 'application/json; charset=utf-8' }
-          )
-          .post('/app/installations/19899812/access_tokens')
-          .reply(
-            200,
-            {
-              token: 'test',
-              permissions: {
-                contents: 'read',
-                issues: 'write',
-                metadata: 'read',
-                pull_requests: 'write'
-              }
-            },
-            { 'content-type': 'application/json; charset=utf-8' }
-          )
-          .get('/repos/SmartBear/changelog-bot-test/contents/CHANGELOG.md')
-          .query({ ref: '4a04b239c9f2c6f3876169a1100bb41156bdbde7' })
-          .replyWithFile(
-            200,
-            resolve(__dirname, '../test/fixtures/response-changelog-content.json'),
-            { 'content-type': 'application/json; charset=utf-8' }
-          )
-          .get('/repos/SmartBear/changelog-bot-test/issues/1/comments')
-          .reply(404)
-        await probot.receive({ id: 'push', name: 'push', payload })
-        assertThat(mock.pendingMocks(), equalTo([]))
-      })
-    })
+    context(
+      'when and issue mentioned in the changelog is missing',
+      async () => {
+        it('does not try to add a comment', async () => {
+          const mock = nock('https://api.github.com')
+            .get('/app')
+            .replyWithFile(
+              200,
+              resolve(__dirname, '../test/fixtures/response-app.json'),
+              { 'content-type': 'application/json; charset=utf-8' }
+            )
+            .post('/app/installations/19899812/access_tokens')
+            .reply(
+              200,
+              {
+                token: 'test',
+                permissions: {
+                  contents: 'read',
+                  issues: 'write',
+                  metadata: 'read',
+                  pull_requests: 'write'
+                }
+              },
+              { 'content-type': 'application/json; charset=utf-8' }
+            )
+            .get('/repos/SmartBear/changelog-bot-test/contents/CHANGELOG.md')
+            .query({ ref: '4a04b239c9f2c6f3876169a1100bb41156bdbde7' })
+            .replyWithFile(
+              200,
+              resolve(
+                __dirname,
+                '../test/fixtures/response-changelog-content.json'
+              ),
+              { 'content-type': 'application/json; charset=utf-8' }
+            )
+            .get('/repos/SmartBear/changelog-bot-test/issues/1/comments')
+            .reply(404)
+          await probot.receive({ id: 'push', name: 'push', payload })
+          assertThat(mock.pendingMocks(), equalTo([]))
+        })
+      }
+    )
   })
 
   it('creates a comment on every issue in the CHANGELOG.md', async () => {
@@ -127,10 +161,16 @@ describe('ChangeBot', () => {
         resolve(__dirname, '../test/fixtures/response-issue-comments.json'),
         { 'content-type': 'application/json; charset=utf-8' }
       )
-      .post('/repos/SmartBear/changelog-bot-test/issues/1/comments',
-        /This was released in \[1.0.0]\(https:\/\/github.com\/SmartBear\/changelog-bot-test\/blob\/main\/CHANGELOG.md#100\)/)
+      .post(
+        '/repos/SmartBear/changelog-bot-test/issues/1/comments',
+        /This was released in \[1.0.0]\(https:\/\/github.com\/SmartBear\/changelog-bot-test\/blob\/main\/CHANGELOG.md#100\)/
+      )
       .reply(200)
-    await probot.receive({ id: 'push', name: 'push', payload })
+    await probot.receive({
+      id: 'push',
+      name: 'push',
+      payload: payload as PushEvent
+    })
     assertThat(mock.pendingMocks(), equalTo([]))
   })
 
@@ -194,8 +234,8 @@ describe('ChangeBot', () => {
 
       await probot.receive({
         id: 'installation',
-        name: 'installation.created',
-        payload: installationPayload
+        name: 'installation',
+        payload: installationPayload as unknown as InstallationCreatedEvent
       })
 
       assertThat(mock.pendingMocks(), equalTo([]))

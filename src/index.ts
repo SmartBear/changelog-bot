@@ -1,7 +1,7 @@
 import { Probot } from 'probot'
 import { ChangeLog } from './model/ChangeLog'
 import { Repo } from './Repo'
-import { RequestError } from "@octokit/request-error";
+import { RequestError } from '@octokit/request-error'
 
 export = (app: Probot): void => {
   app.log.info('Starting up...')
@@ -9,13 +9,13 @@ export = (app: Probot): void => {
   app.on('installation.created', async (context) => {
     app.log.info(`${context.name} event received`)
     const owner = context.payload.installation.account.login
-    for (const repository of context.payload.repositories) {
+    for (const repository of context.payload.repositories || []) {
       const repo = new Repo(context.octokit, owner, repository.name)
       const defaultBranch = await repo.getDefaultBranch()
 
       if (await repo.hasChangeLogOn(defaultBranch)) {
         app.log.info('CHANGELOG.md exists, scanning for fixed issues')
-        await commentOnIssues(repo, defaultBranch, defaultBranch);
+        await commentOnIssues(repo, defaultBranch, defaultBranch)
       } else {
         app.log.info('CHANGELOG missing, creating PR')
         await repo.createPullRequest(defaultBranch)
@@ -46,10 +46,7 @@ export = (app: Probot): void => {
 
     get touchesChangelog(): boolean {
       for (const commit of this.payload.commits) {
-        for (const file of [
-          ...commit.added,
-          ...commit.modified,
-        ]) {
+        for (const file of [...commit.added, ...commit.modified]) {
           if (file === 'CHANGELOG.md') {
             return true
           }
@@ -74,14 +71,17 @@ export = (app: Probot): void => {
       return
     }
     const repo = Repo.fromContext(context)
-    await commentOnIssues(repo, context.payload.after, push.defaultBranch);
+    await commentOnIssues(repo, context.payload.after, push.defaultBranch)
   })
 
-  async function commentOnIssues(repo: Repo, revision: string, defaultBranch: string) {
-
+  async function commentOnIssues(
+    repo: Repo,
+    revision: string,
+    defaultBranch: string
+  ) {
     const content = await repo.getChangeLogContent(revision)
     const changeLog = await ChangeLog.parse(content)
-    const currentUser = await repo.getCurrentUser();
+    const currentUser = await repo.getCurrentUser()
     // Comment on issues
     for (const release of changeLog.releases) {
       // Do not add comments for unreleased issues (yet)
@@ -89,13 +89,15 @@ export = (app: Probot): void => {
         continue
       }
       for (const issue of release.issues) {
-        let allComments: any[];
+        let allComments: any[]
         try {
           allComments = await repo.getCommentsForIssue(issue)
         } catch (err) {
           if (err instanceof RequestError && err.status == 404) {
-            app.log.info(`Issue #${issue.number} was mentioned in the changelog (release ${release.name}) but could not be found.`)
-            continue;
+            app.log.info(
+              `Issue #${issue.number} was mentioned in the changelog (release ${release.name}) but could not be found.`
+            )
+            continue
           }
           throw err
         }
@@ -116,8 +118,7 @@ export = (app: Probot): void => {
         const hasPreviousComment = allComments.some((comment) => {
           return (
             comment.body === commentToAdd &&
-            comment.user &&
-            comment.user.login === `${currentUser}[bot]`
+            comment.user?.login === `${currentUser}[bot]`
           )
         })
 

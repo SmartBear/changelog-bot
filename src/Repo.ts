@@ -85,7 +85,7 @@ export class Repo {
     return repo.data.default_branch
   }
 
-  public async getCurrentUser(){
+  public async getCurrentUser(): Promise<string> {
     const currentUser = await this.octokit.apps.getAuthenticated()
     return currentUser.data.name
   }
