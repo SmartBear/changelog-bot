@@ -107,7 +107,9 @@ export = (app: Probot): void => {
         const anchor = GitHubHeadingAnchor.to(release.name)
         const releaseUrl = `https://github.com/${repo.owner}/${repo.name}/blob/${defaultBranch}/CHANGELOG.md#${anchor}`
 
-        const commentToAdd = `🎉 This change was released in [${release.name}](${releaseUrl}) 🚀`
+        const commentToAdd = `🎉 This change was released in [${release.name}](${releaseUrl}) 🚀
+
+💖 from [SmartBear ChangeBot](github.com/apps/smartbear-changebot).`
 
         const hasPreviousComment = allComments.some((comment) => {
           return (
