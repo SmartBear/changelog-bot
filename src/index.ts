@@ -1,6 +1,7 @@
 import { Probot } from 'probot'
 import { ChangeLog } from './model/ChangeLog'
 import { Repo } from './Repo'
+import { RequestError } from "@octokit/request-error";
 
 export = (app: Probot): void => {
   app.log.info('Starting up...')
@@ -88,7 +89,16 @@ export = (app: Probot): void => {
         continue
       }
       for (const issue of release.issues) {
-        const allComments = await repo.getCommentsForIssue(issue)
+        let allComments: any[];
+        try {
+          allComments = await repo.getCommentsForIssue(issue)
+        } catch (err) {
+          if (err instanceof RequestError && err.status == 404) {
+            app.log.info(`Issue #${issue.number} was mentioned in the changelog (release ${release.name}) but could not be found.`)
+            continue;
+          }
+          throw err
+        }
 
         // TODO: make this more robust - it doesn't work if the release header contains a date - https://github.com/SmartBear/changelog-bot/issues/18
         // copy/pasted from the web 🤞
