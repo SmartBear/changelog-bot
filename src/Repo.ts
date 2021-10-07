@@ -85,6 +85,11 @@ export class Repo {
     return repo.data.default_branch
   }
 
+  public async getCurrentUser(){
+    const currentUser = await this.octokit.apps.getAuthenticated()
+    return currentUser.data.name
+  }
+
   public async createPullRequest(origin: string): Promise<void> {
     const mainRef = await this.octokit.rest.git.getRef({
       repo: this.name,

@@ -13,8 +13,8 @@ export = (app: Probot): void => {
       const defaultBranch = await repo.getDefaultBranch()
 
       if (await repo.hasChangeLogOn(defaultBranch)) {
-        app.log.info('CHANGELOG.md exists, nothing to do')
-        // TODO: could run a full scan here? https://github.com/SmartBear/changelog-bot/issues/16
+        app.log.info('CHANGELOG.md exists, scanning for fixed issues')
+        await commentOnIssues(repo, defaultBranch, defaultBranch);
       } else {
         app.log.info('CHANGELOG missing, creating PR')
         await repo.createPullRequest(defaultBranch)
@@ -72,15 +72,16 @@ export = (app: Probot): void => {
       app.log.info(`Ignoring push that does not touch CHANGELOG.md`)
       return
     }
-
     const repo = Repo.fromContext(context)
+    await commentOnIssues(repo, context.payload.after, push.defaultBranch);
+  })
 
-    const revision: string = context.payload.after
+  async function commentOnIssues(repo: Repo, revision: string, defaultBranch: string) {
+
     const content = await repo.getChangeLogContent(revision)
     const changeLog = await ChangeLog.parse(content)
-
+    const currentUser = await repo.getCurrentUser();
     // Comment on issues
-    const currentUser = await context.octokit.apps.getAuthenticated()
     for (const release of changeLog.releases) {
       // Do not add comments for unreleased issues (yet)
       if (release.name.toLowerCase().includes('unreleased')) {
@@ -98,7 +99,7 @@ export = (app: Probot): void => {
           .replace(/[^\w\- ]+/g, ' ')
           .replace(/\s+/g, '-')
           .replace(/-+$/, '')
-        const releaseUrl = `https://github.com/${repo.owner}/${repo.name}/blob/${push.defaultBranch}/CHANGELOG.md#${anchor}`
+        const releaseUrl = `https://github.com/${repo.owner}/${repo.name}/blob/${defaultBranch}/CHANGELOG.md#${anchor}`
 
         const commentToAdd = `This was released in [${release.name}](${releaseUrl})`
 
@@ -106,7 +107,7 @@ export = (app: Probot): void => {
           return (
             comment.body === commentToAdd &&
             comment.user &&
-            comment.user.login === `${currentUser.data.name}[bot]`
+            comment.user.login === `${currentUser}[bot]`
           )
         })
 
@@ -120,5 +121,5 @@ export = (app: Probot): void => {
         await repo.createIssueComment(issue, commentToAdd)
       }
     }
-  })
+  }
 }
