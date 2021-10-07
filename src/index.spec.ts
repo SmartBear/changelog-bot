@@ -10,12 +10,10 @@ import { join, resolve } from 'path'
 import { assertThat, equalTo } from 'hamjest'
 
 type LoadsFixtures = <EventName extends WebhookEventName>(
-  name: EventName,
   path: string
 ) => WebhookEventMap[EventName]
 
 const payloadFixture: LoadsFixtures = <EventName extends WebhookEventName>(
-  name: EventName,
   path: string
 ) => {
   const rawPayload: unknown = JSON.parse(
@@ -24,20 +22,16 @@ const payloadFixture: LoadsFixtures = <EventName extends WebhookEventName>(
   return rawPayload as WebhookEventMap[EventName]
 }
 
-const payload = payloadFixture(
-  'push',
+const payload = payloadFixture<'push'>(
   '../test/fixtures/push.update-changelog.json'
 )
-const payloadNoChanges = payloadFixture(
-  'push',
+const payloadNoChanges = payloadFixture<'push'>(
   '../test/fixtures/push.not-updating-changelog.json'
 )
-const installationPayload = payloadFixture(
-  'installation',
+const installationPayload = payloadFixture<'installation'>(
   '../test/fixtures/installation.created.json'
 )
-const payloadRemoveChangelog = payloadFixture(
-  'push',
+const payloadRemoveChangelog = payloadFixture<'push'>(
   '../test/fixtures/push.delete-changelog.json'
 )
 
