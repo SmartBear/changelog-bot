@@ -54,6 +54,42 @@ describe('ChangeBot', () => {
         })
       })
     })
+    context('when and issue mentioned in the changelog is missing', async () => {
+      it('does not try to add a comment', async () => {
+        const mock = nock('https://api.github.com')
+          .get('/app')
+          .replyWithFile(
+            200,
+            resolve(__dirname, '../test/fixtures/response-app.json'),
+            { 'content-type': 'application/json; charset=utf-8' }
+          )
+          .post('/app/installations/19899812/access_tokens')
+          .reply(
+            200,
+            {
+              token: 'test',
+              permissions: {
+                contents: 'read',
+                issues: 'write',
+                metadata: 'read',
+                pull_requests: 'write'
+              }
+            },
+            { 'content-type': 'application/json; charset=utf-8' }
+          )
+          .get('/repos/SmartBear/changelog-bot-test/contents/CHANGELOG.md')
+          .query({ ref: '4a04b239c9f2c6f3876169a1100bb41156bdbde7' })
+          .replyWithFile(
+            200,
+            resolve(__dirname, '../test/fixtures/response-changelog-content.json'),
+            { 'content-type': 'application/json; charset=utf-8' }
+          )
+          .get('/repos/SmartBear/changelog-bot-test/issues/1/comments')
+          .reply(404)
+        await probot.receive({ id: 'push', name: 'push', payload })
+        assertThat(mock.pendingMocks(), equalTo([]))
+      })
+    })
   })
 
   it('creates a comment on every issue in the CHANGELOG.md', async () => {
