@@ -48,7 +48,6 @@ export = (app: Probot): void => {
         for (const file of [
           ...commit.added,
           ...commit.modified,
-          ...commit.removed
         ]) {
           if (file === 'CHANGELOG.md') {
             return true
@@ -76,7 +75,6 @@ export = (app: Probot): void => {
 
     const repo = Repo.fromContext(context)
 
-    // TODO: handle when there's no changelog file in the repo - do nothing - https://github.com/SmartBear/changelog-bot/issues/15
     const revision: string = context.payload.after
     const content = await repo.getChangeLogContent(revision)
     const changeLog = await ChangeLog.parse(content)

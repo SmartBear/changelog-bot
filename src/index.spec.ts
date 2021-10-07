@@ -10,6 +10,7 @@ import { assertThat, equalTo } from 'hamjest'
 // const issueCreatedBody = { body: "Thanks for opening this issue!" };
 import payload from '../test/fixtures/push.update-changelog.json'
 import payloadNoChanges from '../test/fixtures/push.not-updating-changelog.json'
+import payloadRemoveChangelog from '../test/fixtures/push.delete-changelog.json'
 import installationPayload from '../test/fixtures/installation.created.json'
 
 const privateKey = readFileSync(
@@ -41,6 +42,15 @@ describe('ChangeBot', () => {
           id: 'push',
           name: 'push',
           payload: payloadNoChanges
+        })
+      })
+    })
+    context('when the commit deletes a changelog', async () => {
+      it('does nothing', async () => {
+        await probot.receive({
+          id: 'push',
+          name: 'push',
+          payload: payloadRemoveChangelog
         })
       })
     })
