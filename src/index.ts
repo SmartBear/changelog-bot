@@ -1,6 +1,6 @@
 import { Probot } from 'probot'
 import { ChangeLog } from './model/ChangeLog'
-import { Repo } from './Repo'
+import { IssueComments, Repo } from './Repo'
 import { RequestError } from '@octokit/request-error'
 
 export = (app: Probot): void => {
@@ -88,8 +88,9 @@ export = (app: Probot): void => {
       if (release.name.toLowerCase().includes('unreleased')) {
         continue
       }
+
       for (const issue of release.issues) {
-        let allComments: any[]
+        let allComments: IssueComments
         try {
           allComments = await repo.getCommentsForIssue(issue)
         } catch (err) {

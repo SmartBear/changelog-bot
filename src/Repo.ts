@@ -5,6 +5,9 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 import { Issue } from './model/Issue'
 
+export type IssueComments =
+  RestEndpointMethodTypes['issues']['listComments']['response']['data']
+
 interface Context {
   octokit: InstanceType<typeof ProbotOctokit>
   payload: {
@@ -47,7 +50,7 @@ export class Repo {
     }
   }
 
-  public async getCommentsForIssue(issue: Issue) {
+  public async getCommentsForIssue(issue: Issue): Promise<IssueComments> {
     const request: RestEndpointMethodTypes['issues']['listComments']['parameters'] =
       {
         owner: this.owner,
