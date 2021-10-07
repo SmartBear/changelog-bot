@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc && npm run copyfiles",
     "prettier:format": "prettier --config .prettierrc 'src/**/*.ts' --write",
-    "start": "probot run ./lib/src/index.js",
+    "start": "probot run ./lib/index.js",
     "copyfiles": "cp ./src/CHANGELOG.md ./lib/CHANGELOG.md",
     "test": "mocha"
   },
