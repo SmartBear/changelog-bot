@@ -3,6 +3,7 @@ import { ChangeLog } from './model/ChangeLog'
 import { IssueComments, Repo } from './Repo'
 import { RequestError } from '@octokit/request-error'
 import { GitHubHeadingAnchor } from './GitHubHeadingAnchor'
+import { containsInAnyOrder } from 'hamjest'
 
 export = (app: Probot): void => {
   app.log.info('Starting up...')
@@ -62,7 +63,9 @@ export = (app: Probot): void => {
   }
 
   app.on('push', async (context) => {
-    app.log.info(`${context.name} event received`)
+    app.log.info(
+      `${context.name} event received for repo ${context.payload.repository.full_name}`
+    )
     const push = new Push(context.payload)
 
     if (!push.isToDefaultBranch) {
