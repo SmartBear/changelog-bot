@@ -10,7 +10,10 @@ describe(ChangeLog.name, () => {
     const changeLog = await ChangeLog.parse(
       '## [7.0.0](https://github.com/cucumber/cucumber-ruby/compare/v6.1.0...v7.0.0) (2021-07-19)'
     )
-    assertThat(changeLog.releases[0], equalTo(new Release('7.0.0', [])))
+    assertThat(
+      changeLog.releases[0],
+      equalTo(new Release('7.0.0', '7.0.0 (2021-07-19)', []))
+    )
   })
 
   it('parses a changelog with a single release and a single issue', async () => {
@@ -22,7 +25,7 @@ describe(ChangeLog.name, () => {
     const changeLog = await ChangeLog.parse(content)
     assertThat(
       changeLog.releases[0],
-      equalTo(new Release('7.0.0', [new Issue(1)]))
+      equalTo(new Release('7.0.0', '7.0.0 (2021-07-19)', [new Issue(1)]))
     )
   })
 
@@ -40,11 +43,15 @@ describe(ChangeLog.name, () => {
     const changeLog = await ChangeLog.parse(content)
     assertThat(
       changeLog.releases[0],
-      equalTo(new Release('7.0.0', [new Issue(1), new Issue(2)]))
+      equalTo(
+        new Release('7.0.0', '7.0.0 (2021-07-19)', [new Issue(1), new Issue(2)])
+      )
     )
     assertThat(
       changeLog.releases[1],
-      equalTo(new Release('6.1.0', [new Issue(3), new Issue(4)]))
+      equalTo(
+        new Release('6.1.0', '6.1.0 (2020-07-19)', [new Issue(3), new Issue(4)])
+      )
     )
   })
 
@@ -62,11 +69,18 @@ describe(ChangeLog.name, () => {
     const changeLog = await ChangeLog.parse(content)
     assertThat(
       changeLog.releases[0],
-      equalTo(new Release('[Unreleased]', [new Issue(1), new Issue(2)]))
+      equalTo(
+        new Release('[Unreleased]', '[Unreleased]', [
+          new Issue(1),
+          new Issue(2)
+        ])
+      )
     )
     assertThat(
       changeLog.releases[1],
-      equalTo(new Release('6.1.0', [new Issue(3), new Issue(4)]))
+      equalTo(
+        new Release('6.1.0', '6.1.0 (2020-07-19)', [new Issue(3), new Issue(4)])
+      )
     )
   })
 
