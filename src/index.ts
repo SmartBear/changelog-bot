@@ -3,7 +3,6 @@ import { ChangeLog } from './model/ChangeLog'
 import { IssueComments, Repo } from './Repo'
 import { RequestError } from '@octokit/request-error'
 import { GitHubHeadingAnchor } from './GitHubHeadingAnchor'
-import { containsInAnyOrder } from 'hamjest'
 
 export = (app: Probot): void => {
   app.log.info('Starting up...')
