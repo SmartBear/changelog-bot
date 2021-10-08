@@ -104,7 +104,7 @@ export = (app: Probot): void => {
           throw err
         }
 
-        const anchor = GitHubHeadingAnchor.to(release.name)
+        const anchor = GitHubHeadingAnchor.to(release.heading)
         const releaseUrl = `https://github.com/${repo.owner}/${repo.name}/blob/${defaultBranch}/CHANGELOG.md#${anchor}`
 
         const commentToAdd = `🎉 This change was released in [${release.name}](${releaseUrl}) 🚀
