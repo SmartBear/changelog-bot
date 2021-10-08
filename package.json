@@ -25,7 +25,7 @@
     "@types/remove-markdown": "^0.3.1",
     "changelog-parser": "2.8.0",
     "probot": "12.1.1",
-    "remove-markdown": "^0.2.2"
+    "remove-markdown": "0.3.0"
   },
   "devDependencies": {
     "@types/mocha": "9.0.0",
