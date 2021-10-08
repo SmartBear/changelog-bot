@@ -8,7 +8,11 @@ export = (app: Probot): void => {
   app.log.info('Starting up...')
 
   app.on('installation.created', async (context) => {
-    app.log.info(`${context.name} event received`)
+    app.log.info(
+      `${context.name} event received for ${context.payload.repositories
+        ?.map((r) => r.full_name)
+        .join(', ')}`
+    )
     const owner = context.payload.installation.account.login
     for (const repository of context.payload.repositories || []) {
       const repo = new Repo(context.octokit, owner, repository.name)
@@ -103,7 +107,6 @@ export = (app: Probot): void => {
           }
           throw err
         }
-
         const anchor = GitHubHeadingAnchor.to(release.heading)
         const releaseUrl = `https://github.com/${repo.owner}/${repo.name}/blob/${defaultBranch}/CHANGELOG.md#${anchor}`
 
